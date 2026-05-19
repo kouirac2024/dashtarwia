@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suivi des Leads — Omra 2026</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1>🕌 Suivi des Leads — <span class="gold-text">Tarwia Travel</span></h1>
+                <p class="subtitle">Tableau de bord commercial · Omra 2026</p>
+            </div>
+            
+            <div class="dossier-container" style="margin-top: 1.5rem; display: flex; justify-content: center; align-items: center; gap: 1rem;">
+                <label for="dossier-select" style="color:var(--text-muted); font-size:0.9rem; font-weight: 500;">Dossier :</label>
+                <select id="dossier-select" class="filter-select" style="min-width: 200px;"></select>
+                <button id="new-dossier-btn" class="btn btn-secondary" style="padding: 0.5rem 1rem;">➕ Nouveau</button>
+                <button id="delete-dossier-btn" class="btn btn-secondary" style="padding: 0.5rem 1rem; color: var(--c-red); border-color: var(--c-red); display:none;">🗑️ Supprimer</button>
+            </div>
+            <div class="header-line"></div>
+        </header>
+
+        <!-- KPIs -->
+        <section class="kpis">
+            <div class="kpi-card" data-type="total">
+                <div class="kpi-line kpi-line-blue"></div>
+                <h3>Total Leads</h3>
+                <p class="kpi-value" id="kpi-total">0</p>
+            </div>
+            <div class="kpi-card" data-type="reservés">
+                <div class="kpi-line kpi-line-green"></div>
+                <h3>Réservés ✅</h3>
+                <p class="kpi-value" id="kpi-reserved">0</p>
+            </div>
+            <div class="kpi-card" data-type="intéressés">
+                <div class="kpi-line kpi-line-orange"></div>
+                <h3>Intéressés</h3>
+                <p class="kpi-value" id="kpi-interested">0</p>
+            </div>
+            <div class="kpi-card" data-type="relancer">
+                <div class="kpi-line kpi-line-yellow"></div>
+                <h3>À Relancer</h3>
+                <p class="kpi-value" id="kpi-recall">0</p>
+            </div>
+            <div class="kpi-card" data-type="perdus">
+                <div class="kpi-line kpi-line-red"></div>
+                <h3>Perdus</h3>
+                <p class="kpi-value" id="kpi-lost">0</p>
+            </div>
+        </section>
+
+        <!-- Filters & Actions -->
+        <section class="controls">
+            <div class="filters">
+                <input type="text" id="search-input" placeholder="🔍 Rechercher un nom, tél, email..." class="filter-input">
+                <select id="status-filter" class="filter-select">
+                    <option value="all">Tous les statuts</option>
+                    <option value="Nouveau">Nouveau</option>
+                    <option value="Contacté">Contacté</option>
+                    <option value="Intéressé">Intéressé</option>
+                    <option value="Réservé">Réservé</option>
+                    <option value="À relancer">À relancer</option>
+                    <option value="Perdu">Perdu</option>
+                </select>
+                <select id="period-filter" class="filter-select">
+                    <option value="all">Toutes les périodes</option>
+                    <option value="Juin 2026">Juin 2026</option>
+                    <option value="Juillet 2026">Juillet 2026</option>
+                    <option value="Septembre 2026">Septembre 2026</option>
+                    <option value="Octobre 2026">Octobre 2026</option>
+                    <option value="Novembre 2026">Novembre 2026</option>
+                    <option value="Décembre 2026">Décembre 2026</option>
+                </select>
+            </div>
+            <div class="actions">
+                <button id="bulk-delete-btn" class="btn btn-secondary" style="display:none; color: var(--c-red); border-color: var(--c-red);">🗑️ Supprimer (<span id="selected-count">0</span>)</button>
+                <button id="export-btn" class="btn btn-secondary">📥 Exporter CSV</button>
+                <button id="add-lead-btn" class="btn btn-primary">➕ Ajouter un Lead</button>
+            </div>
+        </section>
+
+        <!-- Table -->
+        <section class="table-container">
+            <table id="leads-table">
+                <thead>
+                    <tr>
+                        <th style="width: 40px;"><input type="checkbox" id="select-all"></th>
+                        <th>#</th>
+                        <th data-sort="date">Date ↕️</th>
+                        <th data-sort="name">Nom ↕️</th>
+                        <th>Téléphone</th>
+                        <th>Email</th>
+                        <th data-sort="pax">Pax ↕️</th>
+                        <th>Période Omra</th>
+                        <th>Source</th>
+                        <th>Statut</th>
+                        <th>Priorité</th>
+                        <th data-sort="recall">Date de rappel ↕️</th>
+                        <th>Notes</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    <!-- Rows will be populated by JS -->
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-stats">
+                Affichage de <span id="displayed-count">0</span> leads sur <span id="total-count">0</span>
+            </div>
+            <div class="footer-legend">
+                <span class="legend-item"><span class="dot dot-blue"></span> Nouveau</span>
+                <span class="legend-item"><span class="dot dot-purple"></span> Contacté</span>
+                <span class="legend-item"><span class="dot dot-orange"></span> Intéressé</span>
+                <span class="legend-item"><span class="dot dot-green"></span> Réservé</span>
+                <span class="legend-item"><span class="dot dot-yellow"></span> À relancer</span>
+                <span class="legend-item"><span class="dot dot-red"></span> Perdu</span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Add Lead Modal -->
+    <div id="add-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Ajouter un nouveau Lead</h2>
+                <span class="close-modal">&times;</span>
+            </div>
+            <form id="add-lead-form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Nom complet</label>
+                        <input type="text" id="add-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Téléphone</label>
+                        <input type="tel" id="add-phone" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="add-email">
+                    </div>
+                    <div class="form-group">
+                        <label>Nombre de personnes (Pax)</label>
+                        <input type="number" id="add-pax" min="1" value="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Période Omra</label>
+                        <select id="add-period" required>
+                            <option value="Juin 2026">Juin 2026</option>
+                            <option value="Juillet 2026">Juillet 2026</option>
+                            <option value="Septembre 2026">Septembre 2026</option>
+                            <option value="Octobre 2026">Octobre 2026</option>
+                            <option value="Novembre 2026">Novembre 2026</option>
+                            <option value="Décembre 2026">Décembre 2026</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Source</label>
+                        <select id="add-source" required>
+                            <option value="Facebook Ads">Facebook Ads</option>
+                            <option value="Instagram Ads">Instagram Ads</option>
+                            <option value="TikTok Ads">TikTok Ads</option>
+                            <option value="Site Web">Site Web</option>
+                            <option value="Bouche à oreille">Bouche à oreille</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Statut</label>
+                        <select id="add-status" required>
+                            <option value="Nouveau">Nouveau</option>
+                            <option value="Contacté">Contacté</option>
+                            <option value="Intéressé">Intéressé</option>
+                            <option value="Réservé">Réservé</option>
+                            <option value="À relancer">À relancer</option>
+                            <option value="Perdu">Perdu</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Priorité</label>
+                        <select id="add-priority" required>
+                            <option value="Haute">Haute</option>
+                            <option value="Moyenne">Moyenne</option>
+                            <option value="Basse">Basse</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Date de rappel</label>
+                        <input type="date" id="add-recall">
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Notes</label>
+                        <textarea id="add-notes" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary cancel-modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Lead Modal -->
+    <div id="edit-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Modifier le Lead</h2>
+                <span class="close-modal">&times;</span>
+            </div>
+            <form id="edit-lead-form">
+                <input type="hidden" id="edit-id">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Nom complet</label>
+                        <input type="text" id="edit-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Téléphone</label>
+                        <input type="tel" id="edit-phone" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="edit-email">
+                    </div>
+                    <div class="form-group">
+                        <label>Nombre de personnes (Pax)</label>
+                        <input type="number" id="edit-pax" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Période Omra</label>
+                        <select id="edit-period" required>
+                            <option value="Juin 2026">Juin 2026</option>
+                            <option value="Juillet 2026">Juillet 2026</option>
+                            <option value="Septembre 2026">Septembre 2026</option>
+                            <option value="Octobre 2026">Octobre 2026</option>
+                            <option value="Novembre 2026">Novembre 2026</option>
+                            <option value="Décembre 2026">Décembre 2026</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Source</label>
+                        <select id="edit-source" required>
+                            <option value="Facebook Ads">Facebook Ads</option>
+                            <option value="Instagram Ads">Instagram Ads</option>
+                            <option value="TikTok Ads">TikTok Ads</option>
+                            <option value="Site Web">Site Web</option>
+                            <option value="Bouche à oreille">Bouche à oreille</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Statut</label>
+                        <select id="edit-status" required>
+                            <option value="Nouveau">Nouveau</option>
+                            <option value="Contacté">Contacté</option>
+                            <option value="Intéressé">Intéressé</option>
+                            <option value="Réservé">Réservé</option>
+                            <option value="À relancer">À relancer</option>
+                            <option value="Perdu">Perdu</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Priorité</label>
+                        <select id="edit-priority" required>
+                            <option value="Haute">Haute</option>
+                            <option value="Moyenne">Moyenne</option>
+                            <option value="Basse">Basse</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Date de rappel</label>
+                        <input type="date" id="edit-recall">
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Notes</label>
+                        <textarea id="edit-notes" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary cancel-modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Notes Modal -->
+    <div id="notes-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Notes du Lead</h2>
+                <span class="close-modal">&times;</span>
+            </div>
+            <textarea id="edit-notes-area" rows="5" class="full-width-textarea"></textarea>
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary cancel-modal">Fermer</button>
+                <button type="button" id="save-notes-btn" class="btn btn-primary">Sauvegarder</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Dossier Modal -->
+    <div id="dossier-modal" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2>Créer un nouveau Dossier</h2>
+                <span class="close-modal">&times;</span>
+            </div>
+            <form id="add-dossier-form">
+                <div class="form-group" style="margin-bottom: 1.5rem;">
+                    <label>Nom du Dossier (ex: Omra VIP 2026)</label>
+                    <input type="text" id="add-dossier-name" required>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary cancel-modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Créer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
