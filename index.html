@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,127 +8,243 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <div class="dashboard-container">
-        <!-- Header -->
-        <header class="header">
-            <div class="header-content">
-                <h1>🕌 Suivi des Leads — <span class="gold-text">Tarwia Travel</span></h1>
-                <p class="subtitle">Tableau de bord commercial · Omra 2026</p>
+    <div class="app-layout">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h2>🕌 <span class="gold-text">Tarwia Travel</span></h2>
+                <p>Omra 2026</p>
             </div>
-            
-            <div class="dossier-container" style="margin-top: 1.5rem; display: flex; justify-content: center; align-items: center; gap: 1rem;">
-                <label for="dossier-select" style="color:var(--text-muted); font-size:0.9rem; font-weight: 500;">Dossier :</label>
-                <select id="dossier-select" class="filter-select" style="min-width: 200px;"></select>
-                <button id="new-dossier-btn" class="btn btn-secondary" style="padding: 0.5rem 1rem;">➕ Nouveau</button>
-                <button id="delete-dossier-btn" class="btn btn-secondary" style="padding: 0.5rem 1rem; color: var(--c-red); border-color: var(--c-red); display:none;">🗑️ Supprimer</button>
+            <ul class="nav-links">
+                <li data-target="view-dashboard" class="active">📊 Dashboard</li>
+                <li data-target="view-leads">👥 Gestion Leads</li>
+                <li data-target="view-reminders">📅 Rappels <span id="sidebar-reminder-badge" class="badge-red" style="display:none; margin-left:8px; padding:2px 6px; font-size:10px; border-radius:10px;">0</span></li>
+                <li data-target="view-stats">🏆 Performances</li>
+            </ul>
+            <div class="sidebar-footer">
+                <button id="theme-toggle" class="btn btn-secondary full-width">🌙 Dark Mode</button>
+                <button id="settings-btn" class="btn btn-secondary full-width" style="margin-top:0.5rem;">⚙️ Paramètres</button>
             </div>
-            <div class="header-line"></div>
-        </header>
+        </nav>
 
-        <!-- KPIs -->
-        <section class="kpis">
-            <div class="kpi-card" data-type="total">
-                <div class="kpi-line kpi-line-blue"></div>
-                <h3>Total Leads</h3>
-                <p class="kpi-value" id="kpi-total">0</p>
-            </div>
-            <div class="kpi-card" data-type="reservés">
-                <div class="kpi-line kpi-line-green"></div>
-                <h3>Réservés ✅</h3>
-                <p class="kpi-value" id="kpi-reserved">0</p>
-            </div>
-            <div class="kpi-card" data-type="intéressés">
-                <div class="kpi-line kpi-line-orange"></div>
-                <h3>Intéressés</h3>
-                <p class="kpi-value" id="kpi-interested">0</p>
-            </div>
-            <div class="kpi-card" data-type="relancer">
-                <div class="kpi-line kpi-line-yellow"></div>
-                <h3>À Relancer</h3>
-                <p class="kpi-value" id="kpi-recall">0</p>
-            </div>
-            <div class="kpi-card" data-type="perdus">
-                <div class="kpi-line kpi-line-red"></div>
-                <h3>Perdus</h3>
-                <p class="kpi-value" id="kpi-lost">0</p>
-            </div>
-        </section>
+        <!-- Main Content -->
+        <main class="main-content" id="export-content">
+            <!-- Top Header -->
+            <header class="top-header">
+                <div class="header-title">
+                    <h1 id="page-title">Tableau de bord</h1>
+                    <span id="current-date" class="subtitle"></span>
+                </div>
+                
+                <div class="header-actions">
+                    <div class="dossier-container">
+                        <label for="dossier-select" class="text-muted">Dossier :</label>
+                        <select id="dossier-select" class="filter-select"></select>
+                        <button id="new-dossier-btn" class="btn-icon" title="Nouveau Dossier">➕</button>
+                        <button id="delete-dossier-btn" class="btn-icon" title="Supprimer Dossier" style="color:var(--c-red); display:none;">🗑️</button>
+                    </div>
+                    <button id="export-pdf-btn" class="btn btn-secondary">📄 Rapport PDF</button>
+                </div>
+            </header>
 
-        <!-- Filters & Actions -->
-        <section class="controls">
-            <div class="filters">
-                <input type="text" id="search-input" placeholder="🔍 Rechercher un nom, tél, email..." class="filter-input">
-                <select id="status-filter" class="filter-select">
-                    <option value="all">Tous les statuts</option>
-                    <option value="Nouveau">Nouveau</option>
-                    <option value="Contacté">Contacté</option>
-                    <option value="Intéressé">Intéressé</option>
-                    <option value="Réservé">Réservé</option>
-                    <option value="À relancer">À relancer</option>
-                    <option value="Perdu">Perdu</option>
-                </select>
-                <select id="period-filter" class="filter-select">
-                    <option value="all">Toutes les périodes</option>
-                    <option value="Juin 2026">Juin 2026</option>
-                    <option value="Juillet 2026">Juillet 2026</option>
-                    <option value="Septembre 2026">Septembre 2026</option>
-                    <option value="Octobre 2026">Octobre 2026</option>
-                    <option value="Novembre 2026">Novembre 2026</option>
-                    <option value="Décembre 2026">Décembre 2026</option>
-                </select>
-            </div>
-            <div class="actions">
-                <button id="bulk-delete-btn" class="btn btn-secondary" style="display:none; color: var(--c-red); border-color: var(--c-red);">🗑️ Supprimer (<span id="selected-count">0</span>)</button>
-                <input type="file" id="import-file" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" style="display: none;">
-                <button id="import-btn" class="btn btn-secondary">⬆️ Importer</button>
-                <button id="export-btn" class="btn btn-secondary">📥 Exporter CSV</button>
-                <button id="add-lead-btn" class="btn btn-primary">➕ Ajouter un Lead</button>
-            </div>
-        </section>
+            <!-- ================= VIEW: DASHBOARD ================= -->
+            <div id="view-dashboard" class="view-section active">
+                
+                <!-- KPIs -->
+                <section class="kpis-grid">
+                    <div class="kpi-card" data-type="total">
+                        <div class="kpi-icon bg-blue">👥</div>
+                        <div class="kpi-info">
+                            <h3>Total Leads</h3>
+                            <p class="kpi-value" id="kpi-total">0</p>
+                        </div>
+                    </div>
+                    <div class="kpi-card" data-type="reservés">
+                        <div class="kpi-icon bg-green">✅</div>
+                        <div class="kpi-info">
+                            <h3>Taux de Conv.</h3>
+                            <p class="kpi-value" id="kpi-conv">0%</p>
+                        </div>
+                    </div>
+                    <div class="kpi-card" data-type="ca">
+                        <div class="kpi-icon bg-gold">💰</div>
+                        <div class="kpi-info">
+                            <h3>CA Estimé</h3>
+                            <p class="kpi-value" id="kpi-ca">0 €</p>
+                        </div>
+                    </div>
+                    <div class="kpi-card" data-type="chauds">
+                        <div class="kpi-icon bg-orange">🔥</div>
+                        <div class="kpi-info">
+                            <h3>Leads Chauds</h3>
+                            <p class="kpi-value" id="kpi-hot">0</p>
+                        </div>
+                    </div>
+                    <div class="kpi-card" data-type="rappels">
+                        <div class="kpi-icon bg-purple">📅</div>
+                        <div class="kpi-info">
+                            <h3>Rappels du jour</h3>
+                            <p class="kpi-value" id="kpi-today-reminders">0</p>
+                        </div>
+                    </div>
+                    <div class="kpi-card" data-type="perdus">
+                        <div class="kpi-icon bg-red">❌</div>
+                        <div class="kpi-info">
+                            <h3>Taux de perte</h3>
+                            <p class="kpi-value" id="kpi-loss">0%</p>
+                        </div>
+                    </div>
+                </section>
 
-        <!-- Table -->
-        <section class="table-container">
-            <table id="leads-table">
-                <thead>
-                    <tr>
-                        <th style="width: 40px;"><input type="checkbox" id="select-all"></th>
-                        <th>#</th>
-                        <th data-sort="date">Date ↕️</th>
-                        <th data-sort="name">Nom ↕️</th>
-                        <th>Téléphone</th>
-                        <th>Email</th>
-                        <th data-sort="pax">Pax ↕️</th>
-                        <th>Période Omra</th>
-                        <th>Source</th>
-                        <th>Statut</th>
-                        <th>Priorité</th>
-                        <th data-sort="recall">Date de rappel ↕️</th>
-                        <th>Notes</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="table-body">
-                    <!-- Rows will be populated by JS -->
-                </tbody>
-            </table>
-        </section>
+                <!-- Charts -->
+                <section class="charts-grid">
+                    <div class="chart-card">
+                        <h3>Leads par période Omra</h3>
+                        <canvas id="chartPeriod"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Répartition par Statut</h3>
+                        <canvas id="chartStatus"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Sources des leads</h3>
+                        <canvas id="chartSource"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Évolution temporelle</h3>
+                        <canvas id="chartTimeline"></canvas>
+                    </div>
+                    <div class="chart-card full-width-chart">
+                        <h3>Pax (Capacité) par période</h3>
+                        <canvas id="chartPax"></canvas>
+                    </div>
+                </section>
+            </div>
 
-        <!-- Footer -->
-        <footer class="footer">
-            <div class="footer-stats">
-                Affichage de <span id="displayed-count">0</span> leads sur <span id="total-count">0</span>
+            <!-- ================= VIEW: LEADS ================= -->
+            <div id="view-leads" class="view-section">
+                <!-- Filters & Actions -->
+                <section class="controls">
+                    <div class="filters">
+                        <input type="text" id="search-input" placeholder="🔍 Rechercher (nom, tél, email)..." class="filter-input">
+                        <select id="status-filter" class="filter-select">
+                            <option value="all">Tous statuts</option>
+                            <option value="Nouveau">Nouveau</option>
+                            <option value="Contacté">Contacté</option>
+                            <option value="Intéressé">Intéressé</option>
+                            <option value="Réservé">Réservé</option>
+                            <option value="À relancer">À relancer</option>
+                            <option value="Perdu">Perdu</option>
+                        </select>
+                        <select id="period-filter" class="filter-select">
+                            <option value="all">Toutes périodes</option>
+                            <option value="Juin 2026">Juin 2026</option>
+                            <option value="Juillet 2026">Juillet 2026</option>
+                            <option value="Septembre 2026">Septembre 2026</option>
+                            <option value="Octobre 2026">Octobre 2026</option>
+                            <option value="Novembre 2026">Novembre 2026</option>
+                            <option value="Décembre 2026">Décembre 2026</option>
+                        </select>
+                        <select id="source-filter" class="filter-select">
+                            <option value="all">Toutes sources</option>
+                            <option value="Facebook Ads">Facebook Ads</option>
+                            <option value="Instagram Ads">Instagram Ads</option>
+                            <option value="TikTok Ads">TikTok Ads</option>
+                            <option value="Site Web">Site Web</option>
+                            <option value="Bouche à oreille">Bouche à oreille</option>
+                        </select>
+                        <select id="priority-filter" class="filter-select">
+                            <option value="all">Toutes priorités</option>
+                            <option value="Haute">Haute</option>
+                            <option value="Moyenne">Moyenne</option>
+                            <option value="Basse">Basse</option>
+                        </select>
+                    </div>
+                    <div class="actions">
+                        <button id="bulk-delete-btn" class="btn btn-secondary" style="display:none; color: var(--c-red); border-color: var(--c-red);">🗑️ Supprimer (<span id="selected-count">0</span>)</button>
+                        <input type="file" id="import-file" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" style="display: none;">
+                        <button id="import-btn" class="btn btn-secondary">⬆️ Importer</button>
+                        <button id="export-btn" class="btn btn-secondary">📥 Exporter CSV</button>
+                        <button id="add-lead-btn" class="btn btn-primary">➕ Ajouter Lead</button>
+                    </div>
+                </section>
+
+                <!-- Table -->
+                <section class="table-container">
+                    <table id="leads-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 40px;"><input type="checkbox" id="select-all"></th>
+                                <th data-sort="date">Date ↕️</th>
+                                <th>Score</th>
+                                <th data-sort="name">Nom ↕️</th>
+                                <th>Téléphone</th>
+                                <th data-sort="pax">Pax ↕️</th>
+                                <th>Période</th>
+                                <th>Statut</th>
+                                <th>Priorité</th>
+                                <th data-sort="recallDate">Rappel ↕️</th>
+                                <th>Notes</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </section>
+                <div class="table-footer">
+                    Affichage de <span id="displayed-count">0</span> leads sur <span id="total-count">0</span>
+                </div>
             </div>
-            <div class="footer-legend">
-                <span class="legend-item"><span class="dot dot-blue"></span> Nouveau</span>
-                <span class="legend-item"><span class="dot dot-purple"></span> Contacté</span>
-                <span class="legend-item"><span class="dot dot-orange"></span> Intéressé</span>
-                <span class="legend-item"><span class="dot dot-green"></span> Réservé</span>
-                <span class="legend-item"><span class="dot dot-yellow"></span> À relancer</span>
-                <span class="legend-item"><span class="dot dot-red"></span> Perdu</span>
+
+            <!-- ================= VIEW: REMINDERS ================= -->
+            <div id="view-reminders" class="view-section">
+                <div class="reminders-grid">
+                    <div class="reminder-block" id="block-today">
+                        <h3>📅 Rappels du Jour (<span id="count-today">0</span>)</h3>
+                        <div class="reminder-list" id="list-today"></div>
+                    </div>
+                    <div class="reminder-block" id="block-late">
+                        <h3>⚠️ En Retard (<span id="count-late">0</span>)</h3>
+                        <div class="reminder-list" id="list-late"></div>
+                    </div>
+                    <div class="reminder-block" id="block-idle">
+                        <h3>💤 En Attente > 7 Jours (<span id="count-idle">0</span>)</h3>
+                        <div class="reminder-list" id="list-idle"></div>
+                    </div>
+                </div>
             </div>
-        </footer>
+
+            <!-- ================= VIEW: STATS ================= -->
+            <div id="view-stats" class="view-section">
+                <div class="chart-card full-width-chart" style="margin-bottom: 2rem;">
+                    <h3>Tableau de Performance Commerciale</h3>
+                    <table class="perf-table">
+                        <thead>
+                            <tr>
+                                <th>Période</th>
+                                <th>Leads Totaux</th>
+                                <th>Réservés</th>
+                                <th>Total Pax</th>
+                                <th>CA Estimé</th>
+                                <th>Taux Conv.</th>
+                            </tr>
+                        </thead>
+                        <tbody id="perf-table-body">
+                            <!-- Populated by JS -->
+                        </tbody>
+                        <tfoot id="perf-table-foot">
+                            <!-- Totals -->
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+        </main>
     </div>
 
+    <!-- Modals -->
     <!-- Add Lead Modal -->
     <div id="add-modal" class="modal">
         <div class="modal-content">
@@ -151,7 +267,7 @@
                         <input type="email" id="add-email">
                     </div>
                     <div class="form-group">
-                        <label>Nombre de personnes (Pax)</label>
+                        <label>Pax</label>
                         <input type="number" id="add-pax" min="1" value="1" required>
                     </div>
                     <div class="form-group">
@@ -234,7 +350,7 @@
                         <input type="email" id="edit-email">
                     </div>
                     <div class="form-group">
-                        <label>Nombre de personnes (Pax)</label>
+                        <label>Pax</label>
                         <input type="number" id="edit-pax" min="1" required>
                     </div>
                     <div class="form-group">
@@ -288,7 +404,7 @@
                 </div>
                 <div class="form-actions">
                     <button type="button" class="btn btn-secondary cancel-modal">Annuler</button>
-                    <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
                 </div>
             </form>
         </div>
@@ -309,11 +425,11 @@
         </div>
     </div>
 
-    <!-- Add Dossier Modal -->
+    <!-- Dossier Modal -->
     <div id="dossier-modal" class="modal">
         <div class="modal-content" style="max-width: 400px;">
             <div class="modal-header">
-                <h2>Créer un nouveau Dossier</h2>
+                <h2>Nouveau Dossier</h2>
                 <span class="close-modal">&times;</span>
             </div>
             <form id="add-dossier-form">
@@ -329,6 +445,27 @@
         </div>
     </div>
 
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2>⚙️ Paramètres</h2>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label>Prix Moyen par Personne (€) (pour le calcul du CA)</label>
+                <input type="number" id="setting-price" value="1500" min="0" step="50">
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary cancel-modal">Annuler</button>
+                <button type="button" id="save-settings-btn" class="btn btn-primary">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="js/app.js"></script>
 </body>
