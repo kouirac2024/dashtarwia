@@ -15,6 +15,8 @@ const searchInput = document.getElementById('search-input');
 const statusFilter = document.getElementById('status-filter');
 const periodFilter = document.getElementById('period-filter');
 const exportBtn = document.getElementById('export-btn');
+const importBtn = document.getElementById('import-btn');
+const importFile = document.getElementById('import-file');
 const addLeadBtn = document.getElementById('add-lead-btn');
 const addModal = document.getElementById('add-modal');
 const editModal = document.getElementById('edit-modal');
@@ -585,6 +587,123 @@ function setupEventListeners() {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+    });
+
+    // Import CSV/Excel
+    importBtn.addEventListener('click', () => {
+        if(!currentDossierId) {
+            alert("Veuillez d'abord créer un dossier pour importer des leads.");
+            return;
+        }
+        importFile.click();
+    });
+
+    importFile.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = async (evt) => {
+            try {
+                const data = evt.target.result;
+                const workbook = XLSX.read(data, { type: 'binary' });
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                const rawLeads = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+                if (rawLeads.length <= 1) {
+                    alert("Le fichier semble vide ou ne contient que des en-têtes.");
+                    return;
+                }
+
+                // Get headers from the first row and make them lowercase for easier mapping
+                const headers = rawLeads[0].map(h => String(h).trim().toLowerCase());
+
+                const findColIndex = (keywords) => {
+                    return headers.findIndex(h => keywords.some(kw => h.includes(kw)));
+                };
+
+                const colName = findColIndex(['nom', 'name']);
+                const colPhone = findColIndex(['téléphone', 'tel', 'phone', 'num', 'portable']);
+                const colEmail = findColIndex(['email', 'mail', 'courriel']);
+                const colPax = findColIndex(['pax', 'personne', 'nombre']);
+                const colPeriod = findColIndex(['période', 'period', 'mois', 'date']);
+                const colSource = findColIndex(['source', 'origine']);
+                const colStatus = findColIndex(['statut', 'status', 'état']);
+                const colPriority = findColIndex(['priorité', 'priority', 'importance']);
+                const colNotes = findColIndex(['note', 'remarque', 'commentaire']);
+
+                const leadsToImport = [];
+
+                for (let i = 1; i < rawLeads.length; i++) {
+                    const row = rawLeads[i];
+                    if (!row || row.length === 0) continue;
+
+                    let name = colName >= 0 ? row[colName] : '';
+                    let phone = colPhone >= 0 ? row[colPhone] : '';
+
+                    if (!name && !phone) continue; // Skip empty rows
+
+                    // Ensure phone is a string
+                    if (phone !== undefined && phone !== null) {
+                        phone = String(phone);
+                    } else {
+                        phone = '';
+                    }
+
+                    leadsToImport.push({
+                        name: name || 'Inconnu',
+                        phone: phone,
+                        email: colEmail >= 0 ? row[colEmail] : '',
+                        pax: colPax >= 0 ? (parseInt(row[colPax]) || 1) : 1,
+                        period: colPeriod >= 0 ? row[colPeriod] : 'Juin 2026',
+                        source: colSource >= 0 ? row[colSource] : 'Import',
+                        status: colStatus >= 0 ? row[colStatus] : 'Nouveau',
+                        priority: colPriority >= 0 ? row[colPriority] : 'Moyenne',
+                        notes: colNotes >= 0 ? row[colNotes] : '',
+                        recallDate: '',
+                        date: new Date().toISOString().split('T')[0]
+                    });
+                }
+
+                if (leadsToImport.length === 0) {
+                    alert("Aucun lead valide trouvé. Assurez-vous d'avoir au moins une colonne 'Nom' ou 'Téléphone'.");
+                    return;
+                }
+
+                if (confirm(`Vous allez importer ${leadsToImport.length} leads. Continuer ?`)) {
+                    importBtn.innerHTML = '⏳ Importation...';
+                    importBtn.disabled = true;
+
+                    const response = await fetch(`${API_URL}/leads/bulk`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            dossierId: currentDossierId,
+                            leads: leadsToImport
+                        })
+                    });
+
+                    if (response.ok) {
+                        const result = await response.json();
+                        alert(`Importation réussie :\n✅ ${result.added} leads ajoutés\n⚠️ ${result.skipped} ignorés (doublons ou invalides)`);
+                        await fetchLeads(); // Refresh table
+                    } else {
+                        alert("Erreur lors de l'importation.");
+                    }
+                }
+            } catch (err) {
+                console.error("Erreur de parsing du fichier", err);
+                alert("Erreur lors de la lecture du fichier. Assurez-vous qu'il s'agit d'un fichier CSV ou Excel valide.");
+            } finally {
+                importFile.value = ''; // Reset file input
+                importBtn.innerHTML = '⬆️ Importer';
+                importBtn.disabled = false;
+            }
+        };
+
+        // For CSV, we can read as binary string. SheetJS handles both Excel and CSV binaries.
+        reader.readAsBinaryString(file);
     });
 }
 

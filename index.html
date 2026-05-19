@@ -79,6 +79,8 @@
             </div>
             <div class="actions">
                 <button id="bulk-delete-btn" class="btn btn-secondary" style="display:none; color: var(--c-red); border-color: var(--c-red);">🗑️ Supprimer (<span id="selected-count">0</span>)</button>
+                <input type="file" id="import-file" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" style="display: none;">
+                <button id="import-btn" class="btn btn-secondary">⬆️ Importer</button>
                 <button id="export-btn" class="btn btn-secondary">📥 Exporter CSV</button>
                 <button id="add-lead-btn" class="btn btn-primary">➕ Ajouter un Lead</button>
             </div>
@@ -327,6 +329,7 @@
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>

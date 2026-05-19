@@ -147,6 +147,45 @@ app.delete('/api/leads/:id', (req, res) => {
     }
 });
 
+// Bulk Import Leads
+app.post('/api/leads/bulk', (req, res) => {
+    const data = readData();
+    const newLeads = req.body.leads || [];
+    const dossierId = req.body.dossierId || 1;
+    let addedCount = 0;
+    let skippedCount = 0;
+
+    const maxId = data.leads.length > 0 ? Math.max(...data.leads.map(l => l.id)) : 0;
+    let currentId = maxId + 1;
+
+    for (const lead of newLeads) {
+        if (!lead.phone) {
+            skippedCount++;
+            continue;
+        }
+        const existingLead = data.leads.find(l => l.phone === lead.phone);
+        if (existingLead) {
+            skippedCount++;
+            continue;
+        }
+
+        lead.id = currentId++;
+        if (!lead.date) {
+            lead.date = new Date().toISOString().split('T')[0];
+        }
+        lead.dossierId = dossierId;
+        
+        data.leads.unshift(lead);
+        addedCount++;
+    }
+
+    if (addedCount > 0) {
+        writeData(data);
+    }
+    
+    res.status(201).json({ added: addedCount, skipped: skippedCount });
+});
+
 // Bulk Delete Leads
 app.post('/api/leads/bulk-delete', (req, res) => {
     const data = readData();
@@ -156,8 +195,10 @@ app.post('/api/leads/bulk-delete', (req, res) => {
     res.status(204).send();
 });
 
-const server = app.listen(PORT, () => {
-    console.log(`✅ Backend server is running on http://localhost:${PORT}`);
-});
+if (!process.env.VERCEL) {
+    app.listen(PORT, () => {
+        console.log(`✅ Backend server is running on http://localhost:${PORT}`);
+    });
+}
 
 module.exports = app;
